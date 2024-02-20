@@ -1,81 +1,99 @@
-let todosForm = document.querySelector(".input__section__form");
-let todoInput = document.querySelector(".input__section__form-input");
-let ul = document.querySelector(".todos__section__list");
+let form = document.querySelector(".todo-form"),
+     input = document.querySelector(".add-input"),
+     toDoList = document.querySelector(".todo-list"),
+     todoArr = JSON.parse(localStorage.getItem("item")) || [],
+     toDoId;
+if (localStorage.getItem("item") && todoArr.length > 0) {
 
-let lastItem = document.querySelector(".todos__section__list__item");
-
-let span = document.querySelector(".todos__section__list__item--count");
-
-let allTodos = JSON.parse(localStorage.getItem("todos"))|| [];
-
-// console.log(allTodos);
-
-allTodos.forEach((element) => {
-  let listItem = createTodo(element.todoContent, element.id);
-  ul.insertAdjacentHTML("afterbegin", listItem);
-  // console.log(listItem);
+     toDoId = todoArr[todoArr.length - 1].id + 1
+}
+else {
+     toDoId = 0
+}
+form.addEventListener("submit", function (event) {
+     event.preventDefault();
+     if (input.value != "") {
+          todoArr.push({ id: toDoId++, desc: input.value, checked: false });
+          input.value = "";
+          localStorage.setItem("item", JSON.stringify(todoArr));
+          toDoList.innerHTML += `
+    <li class="list-item ${todoArr[todoArr.length - 1].checked ? "checked" : ""
+               } " data-id=${todoArr[todoArr.length - 1].id}>
+      <div>
+        <span class="checked-item"><i class="fa-solid fa-check"></i></span>
+        <span class="item-description">${todoArr[todoArr.length - 1].desc
+               }</span>
+      </div>
+      <span class="remove-item" data-id=${todoArr[todoArr.length - 1].id} ><i class="fa-solid fa-xmark"></i></span>
+    </li>
+    `;
+          checked()
+          removeTodo()
+     }
 });
 
-let yaradilanburayigilacaq = [];
-let count = 0;
-
-todosForm.addEventListener("submit", function (e) {
-  e.preventDefault();
-  count++;
-  if (todoInput.value.trim() === "") {
-    alert("Boş daxil edilə bilməz!");
-  } else {
-    let listItem = createTodo(todoInput.value, count);
-    ul.insertAdjacentHTML("afterbegin", listItem);
-    //! Local storage
-    yaradilanburayigilacaq.push({
-      todoContent: todoInput.value,
-      id: count,
-      isComplited: false,
-    });
-
-    localStorage.setItem("todos", JSON.stringify(yaradilanburayigilacaq));
-    console.log(yaradilanburayigilacaq);
-    span.textContent = count;
-  }
-  if (yaradilanburayigilacaq.length > 0) {
-    lastItem.classList.remove("hidden");
-  } else {
-    lastItem.classList.add("hidden");
-  }
-
-  todoInput.value = "";
-});
-
-function getElement(element) {
-  if (!element.firstElementChild.classList.contains("checked")) {
-    element.firstElementChild.classList.add("checked");
-
-    let img = document.createElement("img");
-    img.src = "./assets/images/checked.svg";
-    img.alt = "checked";
-
-    element.firstElementChild.appendChild(img);
-
-    element.lastElementChild.style.textDecoration = "line-through";
-    element.lastElementChild.style.color = "#ccc";
-  } else {
-    element.firstElementChild.classList.remove("checked");
-    element.firstElementChild.firstElementChild.remove();
-    element.lastElementChild.style.textDecoration = "none";
-    element.lastElementChild.style.color = "#000";
-  }
+if (localStorage.getItem("item")) {
+     // todoArr = JSON.parse(localStorage.getItem("item"));
+     todoArr.forEach((e) => {
+          toDoList.innerHTML += `
+      <li class="list-item ${e.checked ? "checked" : ""} " data-id=${e.id}>
+      <div>
+        <span class="checked-item"><i class="fa-solid fa-check"></i></span>
+        <span class="item-description">${e.desc}</span>
+      </div>
+      <span class="remove-item" data-id=${e.id}><i class="fa-solid fa-xmark"></i></span>
+      </li>
+        `;
+     });
+     checked()
+     removeTodo()
+}
+function checked() {
+     let checkedItem = document.querySelectorAll(".list-item")
+     checkedItem.forEach((item) => {
+          item.addEventListener("click", function () {
+               todoArr = JSON.parse(localStorage.getItem("item"));
+               let findId = item.getAttribute("data-id")
+               let todoIndex = todoArr.indexOf(todoArr.find(t => t.id === parseInt(findId)))
+               let findTodo = todoArr[todoIndex]
+               findTodo.checked = !findTodo.checked
+               localStorage.setItem("item", JSON.stringify(todoArr))
+               item.classList.toggle("checked")
+          })
+     })
+}
+function removeTodo() {
+     let removeItem = document.querySelectorAll(".remove-item")
+     removeItem.forEach((item) => {
+          item.addEventListener("click", function (e) {
+               let findId = item.getAttribute("data-id")
+               todoArr = JSON.parse(localStorage.getItem("item"));
+               let todoIndex = todoArr.indexOf(todoArr.find(t => t.id === parseInt(findId)))
+               todoArr.splice(todoIndex, 1)
+               item.parentElement.remove()
+               localStorage.setItem("item", JSON.stringify(todoArr))
+               e.stopPropagation()
+          })
+     })
 }
 
-function createTodo(todoText, todoId) {
-  return `
-  <li onclick= "getElement(this)" class="todos__section__list__item" id=${todoId}>
-          <div class="todos__section__list__item-checkbox">
+let modeIcon = document.querySelector(".mode-icon");
+modeIcon.addEventListener("click", function () {
+     document.body.classList.toggle("darkmode");
+     let mode = localStorage.getItem("mode");
+     if (mode === "true") {
+          localStorage.setItem("mode", false);
+          modeIcon.innerHTML = `<i class="fa-solid fa-moon"></i>`
 
-          </div>
-          <p class="todos__section__list__item-text">
-            ${todoText}
-          </p>
-        </li>
-  `;
+     } else {
+          localStorage.setItem("mode", true);
+          modeIcon.innerHTML = `<i class="fa-solid fa-sun"></i>`
+     }
+});
+if (localStorage.getItem("mode") === "true") {
+     document.body.classList.add("darkmode");
+     modeIcon.innerHTML = `<i class="fa-solid fa-sun"></i>`
+} else {
+     document.body.classList.remove("darkmode");
+     modeIcon.innerHTML = `<i class="fa-solid fa-moon"></i>`
 }
