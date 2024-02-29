@@ -18,7 +18,7 @@
 
 ## 🌎 Live Preview
 
-[[https://api-exchange.netlify.app/](https://splendid-profiterole-08c5af.netlify.app/)](https://cute-mermaid-9a38a2.netlify.app)
+(https://splendid-profiterole-08c5af.netlify.app/)](https://cute-mermaid-9a38a2.netlify.app)
 
 ## Contributing
 
